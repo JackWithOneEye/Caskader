@@ -83,10 +83,10 @@ bool PluginCore::initPluginParameters()
 	piParam->setBoundVariable(&shaper_1, boundVariableType::kInt);
 	addPluginParameter(piParam);
 
-	piParam = new PluginParameter(controlID::gain_1, "Saturation 1", "%", controlVariableType::kDouble, 0.000000, 100.000000, 0.000000, taper::kLinearTaper);
+	piParam = new PluginParameter(controlID::sat_1, "Saturation 1", "%", controlVariableType::kDouble, 0.000000, 100.000000, 0.000000, taper::kLinearTaper);
 	piParam->setParameterSmoothing(true);
 	piParam->setSmoothingTimeMsec(20.000000);
-	piParam->setBoundVariable(&gain_1, boundVariableType::kDouble);
+	piParam->setBoundVariable(&sat_1, boundVariableType::kDouble);
 	addPluginParameter(piParam);
 
 	piParam = new PluginParameter(controlID::mod_1, "Modifier1", "%", controlVariableType::kDouble, 0.000000, 100.000000, 0.000000, taper::kLinearTaper);
@@ -99,10 +99,10 @@ bool PluginCore::initPluginParameters()
 	piParam->setBoundVariable(&shaper_2, boundVariableType::kInt);
 	addPluginParameter(piParam);
 
-	piParam = new PluginParameter(controlID::gain_2, "Saturation 2", "%", controlVariableType::kDouble, 0.000000, 100.000000, 0.000000, taper::kLinearTaper);
+	piParam = new PluginParameter(controlID::sat_2, "Saturation 2", "%", controlVariableType::kDouble, 0.000000, 100.000000, 0.000000, taper::kLinearTaper);
 	piParam->setParameterSmoothing(true);
 	piParam->setSmoothingTimeMsec(20.000000);
-	piParam->setBoundVariable(&gain_2, boundVariableType::kDouble);
+	piParam->setBoundVariable(&sat_2, boundVariableType::kDouble);
 	addPluginParameter(piParam);
 
 	piParam = new PluginParameter(controlID::mod_2, "Modifier2", "%", controlVariableType::kDouble, 0.000000, 100.000000, 0.000000, taper::kLinearTaper);
@@ -115,16 +115,26 @@ bool PluginCore::initPluginParameters()
 	piParam->setBoundVariable(&shaper_3, boundVariableType::kInt);
 	addPluginParameter(piParam);
 
-	piParam = new PluginParameter(controlID::gain_3, "Saturation 3", "%", controlVariableType::kDouble, 0.000000, 100.000000, 0.000000, taper::kLinearTaper);
+	piParam = new PluginParameter(controlID::sat_3, "Saturation 3", "%", controlVariableType::kDouble, 0.000000, 100.000000, 0.000000, taper::kLinearTaper);
 	piParam->setParameterSmoothing(true);
 	piParam->setSmoothingTimeMsec(20.000000);
-	piParam->setBoundVariable(&gain_3, boundVariableType::kDouble);
+	piParam->setBoundVariable(&sat_3, boundVariableType::kDouble);
 	addPluginParameter(piParam);
 
 	piParam = new PluginParameter(controlID::mod_3, "Modifier3", "%", controlVariableType::kDouble, 0.000000, 100.000000, 0.000000, taper::kLinearTaper);
 	piParam->setParameterSmoothing(true);
 	piParam->setSmoothingTimeMsec(20.000000);
 	piParam->setBoundVariable(&modifier_3, boundVariableType::kDouble);
+	addPluginParameter(piParam);
+
+	piParam = new PluginParameter(controlID::routing, "Shaper Routing", "SER,PAR,PAR_Y", "SER");
+	piParam->setBoundVariable(&routing, boundVariableType::kInt);
+	addPluginParameter(piParam);
+
+	piParam = new PluginParameter(controlID::parallel_ratio, "Parallel Branches Ratio", "%", controlVariableType::kDouble, 0.000000, 100.000000, 50.000000, taper::kLinearTaper);
+	piParam->setParameterSmoothing(true);
+	piParam->setSmoothingTimeMsec(20.000000);
+	piParam->setBoundVariable(&parallel_ratio, boundVariableType::kDouble);
 	addPluginParameter(piParam);
 
 	piParam = new PluginParameter(controlID::dc_filter, "DC Filter On/Off", "OFF, ON", "OFF");
@@ -278,10 +288,11 @@ inline double atsr(double x)
 	return 2.5 * sum;
 }
 
-inline double hclip(double x)
+inline double hclip(double x, double k)
 {
-	if (fabs(x) > 0.5)
-		return 0.5 * clip(x);
+	double cutoff = k / 100.0;
+	if (fabs(x) > cutoff)
+		return cutoff * clip(x);
 
 	return x;
 }
@@ -296,19 +307,19 @@ inline double fwr(double x)
 	return fabs(x);
 }
 
-inline double sqr(double x)
-{
-	return x * x;
-}
-
 inline double sqs(double x)
 {
-	return sqr(x) * clip(x);
+	return x * x * clip(x);
 }
 
 inline double cube(double x)
 {
-	return sqr(x) * x;
+	return x * x * x;
+}
+
+inline double sqr(double x)
+{
+	return x * x;
 }
 
 inline double asqrt(double x)
@@ -316,7 +327,7 @@ inline double asqrt(double x)
 	return sqrt(fabs(x));
 }
 
-inline double PluginCore::applyShaper(double x, int shaper, double gain, double modifier)
+inline double PluginCore::applyShaper(double x, int shaper, double saturation, double modifier)
 {
 	if (x == 0.0)
 		return 0.0;
@@ -325,28 +336,28 @@ inline double PluginCore::applyShaper(double x, int shaper, double gain, double 
 		return x;
 
 	if (compareEnumToInt(shaper_Enum::NTSFN, shaper))
-		return ntsfn(x, gain, modifier);
+		return ntsfn(x, saturation, modifier);
 
 	if (compareEnumToInt(shaper_Enum::ARRY, shaper))
 		return arry(x);
 
 	if (compareEnumToInt(shaper_Enum::SIG, shaper))
-		return sig(x, gain);
+		return sig(x, saturation);
 
 	if (compareEnumToInt(shaper_Enum::SIG2, shaper))
 		return sig2(x);
 
 	if (compareEnumToInt(shaper_Enum::TANH, shaper))
-		return tanh(x, gain);
+		return tanh(x, saturation);
 
 	if (compareEnumToInt(shaper_Enum::ATAN, shaper))
-		return atan(x, gain);
+		return atan(x, saturation);
 
 	if (compareEnumToInt(shaper_Enum::FEXP1, shaper))
-		return fexp1(x, gain);
+		return fexp1(x, saturation);
 
 	if (compareEnumToInt(shaper_Enum::NTSFP, shaper))
-		return ntsfp(x, gain, modifier);
+		return ntsfp(x, saturation, modifier);
 
 	if (compareEnumToInt(shaper_Enum::FEXP2, shaper))
 		return fexp2(x);
@@ -364,21 +375,27 @@ inline double PluginCore::applyShaper(double x, int shaper, double gain, double 
 		return cube(x);
 
 	if (compareEnumToInt(shaper_Enum::HCLIP, shaper))
-		return hclip(x);
+		return hclip(x, saturation);
 
 	if (compareEnumToInt(shaper_Enum::HWR, shaper))
-		return hwr(x);
+		return hwr(x); // rectifier
 
 	if (compareEnumToInt(shaper_Enum::FWR, shaper))
-		return fwr(x);
+		return fwr(x); // rectifier
 
 	if (compareEnumToInt(shaper_Enum::SQR, shaper))
-		return sqr(x);
+		return sqr(x); // rectifier
 
 	if (compareEnumToInt(shaper_Enum::ASQRT, shaper))
-		return asqrt(x);
+		return asqrt(x); // rectifier
 
 	return x;
+}
+
+inline double calcParallelMix(double b1, double b2, double ratio)
+{
+	double r_normalized = ratio / 100.0;
+	return (1.0 - r_normalized) * b1 + r_normalized * b2;
 }
 
 inline double PluginCore::applyDCFilter(double x, double& x_1, double& y_1)
@@ -388,6 +405,35 @@ inline double PluginCore::applyDCFilter(double x, double& x_1, double& y_1)
 	x_1 = x;
 	y_1 = y_n;
 	return y_n;
+}
+
+inline double PluginCore::processInput(double x)
+{
+	double x_gain = x * pow(10.0, input_gain / 20.0);
+	double y = applyShaper(x_gain, shaper_1, sat_1, modifier_1);
+	if (compareEnumToInt(routing_Enum::SER, routing))
+	{
+		y = applyShaper(y, shaper_2, sat_2, modifier_2);
+		y = applyShaper(y, shaper_3, sat_3, modifier_3);
+	}
+	else if (compareEnumToInt(routing_Enum::PAR, routing))
+	{
+		double yn_L23 = applyShaper(x_gain, shaper_2, sat_2, modifier_2);
+		yn_L23 = applyShaper(yn_L23, shaper_3, sat_3, modifier_3);
+		y = calcParallelMix(y, yn_L23, parallel_ratio);
+	}
+	else if (compareEnumToInt(routing_Enum::PAR_Y, routing))
+	{
+		double yn_L12 = applyShaper(y, shaper_2, sat_2, modifier_2);
+		double yn_L13 = applyShaper(y, shaper_3, sat_3, modifier_3);
+		y = calcParallelMix(yn_L12, yn_L13, parallel_ratio);
+	}
+	double dc_filtered_y = applyDCFilter(y, dc_x_1.first, dc_y_1.first);
+	if (compareEnumToInt(dc_filterEnum::ON, dc_filter))
+	{
+		y = dc_filtered_y;
+	}
+	return y * pow(10.0, output_gain / 20.0);
 }
 
 /**
@@ -471,17 +517,7 @@ bool PluginCore::processAudioFrame(ProcessFrameInfo& processFrameInfo)
 		processFrameInfo.numAudioOutChannels == 0)
 		return false;
 
-	double xnL = processFrameInfo.audioInputFrame[0];
-	xnL = xnL * pow(10.0, input_gain / 20.0);
-	double ynL = applyShaper(xnL, shaper_1, gain_1, modifier_1);
-	ynL = applyShaper(ynL, shaper_2, gain_2, modifier_2);
-	ynL = applyShaper(ynL, shaper_3, gain_3, modifier_3);
-	double dc_filtered_ynL = applyDCFilter(ynL, dc_x_1.first, dc_y_1.first);
-	if (compareEnumToInt(dc_filterEnum::ON, dc_filter))
-	{
-		ynL = dc_filtered_ynL;
-	}
-	ynL = ynL * pow(10.0, output_gain / 20.0);
+	double ynL = processInput(processFrameInfo.audioInputFrame[0]);
 
     // --- FX Plugin:
     if(processFrameInfo.channelIOConfig.inputChannelFormat == kCFMono &&
@@ -504,17 +540,7 @@ bool PluginCore::processAudioFrame(ProcessFrameInfo& processFrameInfo)
         return true; /// processed
     }
 
-	double xnR = processFrameInfo.audioInputFrame[1];
-	xnR = xnR * pow(10.0, input_gain / 20.0);
-	double ynR = applyShaper(xnR, shaper_1, gain_1, modifier_1);
-	ynR = applyShaper(ynR, shaper_2, gain_2, modifier_2);
-	ynR = applyShaper(ynR, shaper_3, gain_3, modifier_3);
-	double dc_filtered_ynR = applyDCFilter(ynR, dc_x_1.second, dc_y_1.second);
-	if (compareEnumToInt(dc_filterEnum::ON, dc_filter))
-	{
-		ynR = dc_filtered_ynR;
-	}
-	ynR = ynR * pow(10.0, output_gain / 20.0);
+	double ynR = processInput(processFrameInfo.audioInputFrame[1]);
 
     // --- Stereo-In/Stereo-Out
     if(processFrameInfo.channelIOConfig.inputChannelFormat == kCFStereo &&

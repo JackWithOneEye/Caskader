@@ -21,15 +21,17 @@ enum controlID {
 	input_gain = 0,
 	output_gain = 1,
 	shaper_1 = 2,
-	gain_1 = 3,
+	sat_1 = 3,
 	mod_1 = 4,
 	shaper_2 = 5,
-	gain_2 = 6,
+	sat_2 = 6,
 	mod_2 = 7,
 	shaper_3 = 8,
-	gain_3 = 9,
+	sat_3 = 9,
 	mod_3 = 10,
-	dc_filter = 11
+	routing = 11,
+	parallel_ratio = 12,
+	dc_filter = 13
 };
 
 // **--0x0F1F--**
@@ -118,9 +120,9 @@ public:
 	std::pair<double, double> dc_y_1 = std::make_pair(0.0, 0.0);
 
 
-	// inline double ntsf(double x, double k, double m);
 	inline double applyShaper(double x, int shaper, double gain, double modifier);
 	inline double applyDCFilter(double x, double& x_1, double& y_1);
+	inline double processInput(double x);
 
 	// --- END USER VARIABLES AND FUNCTIONS -------------------------------------- //
 
@@ -131,14 +133,24 @@ private:
 
 	enum class shaper_Enum { NONE, NTSFN, ARRY, SIG, SIG2, TANH, ATAN, FEXP1, NTSFP, FEXP2, EXP2, ATSR, SQS, CUBE, HCLIP, HWR, FWR, SQR, ASQRT };
 	int shaper_1 = 0;
-	double gain_1 = 0.00000000;
+	double sat_1 = 0.00000000;
 	double modifier_1 = 0.00000000;
 	int shaper_2 = 0;
-	double gain_2 = 0.00000000;
+	double sat_2 = 0.00000000;
 	double modifier_2 = 0.00000000;
 	int shaper_3 = 0;
-	double gain_3 = 0.00000000;
+	double sat_3 = 0.00000000;
 	double modifier_3 = 0.00000000;
+
+	/*
+	* SER: 1 -> 2 -> 3
+	* PAR: 1 / 2 -> 3
+	* PAR_Y: 1 -> 2 / 1 -> 3
+	*/
+	int routing = 0;
+	enum class routing_Enum { SER, PAR, PAR_Y };
+
+	double parallel_ratio = 50.00000000;
 
 	int dc_filter = 0;
 	enum class dc_filterEnum { OFF, ON };
