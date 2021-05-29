@@ -14,6 +14,7 @@
 #define __pluginCore_h__
 
 #include "pluginbase.h"
+#include "fxobjects.h"
 
 // **--0x7F1F--**
 
@@ -23,15 +24,17 @@ enum controlID {
 	shaper_1 = 2,
 	sat_1 = 3,
 	mod_1 = 4,
-	shaper_2 = 5,
-	sat_2 = 6,
-	mod_2 = 7,
-	shaper_3 = 8,
-	sat_3 = 9,
-	mod_3 = 10,
-	routing = 11,
-	parallel_ratio = 12,
-	dc_filter = 13
+	dcf_1 = 5,
+	shaper_2 = 6,
+	sat_2 = 7,
+	mod_2 = 8,
+	dcf_2 = 9,
+	shaper_3 = 10,
+	sat_3 = 11,
+	mod_3 = 12,
+	dcf_3 = 13,
+	routing = 14,
+	parallel_ratio = 15
 };
 
 // **--0x0F1F--**
@@ -115,14 +118,7 @@ public:
 	// --- BEGIN USER VARIABLES AND FUNCTIONS -------------------------------------- //
 	//	   Add your variables and methods here
 
-	const double dc_coeff = 0.995;
-	std::pair<double, double> dc_x_1 = std::make_pair(0.0, 0.0);
-	std::pair<double, double> dc_y_1 = std::make_pair(0.0, 0.0);
-
-
-	inline double applyShaper(double x, int shaper, double gain, double modifier);
-	inline double applyDCFilter(double x, double& x_1, double& y_1);
-	inline double processInput(double x);
+	MultiWaveShaper mws;
 
 	// --- END USER VARIABLES AND FUNCTIONS -------------------------------------- //
 
@@ -132,15 +128,19 @@ private:
 	double output_gain = 0.00000000;
 
 	enum class shaper_Enum { NONE, NTSFN, ARRY, SIG, SIG2, TANH, ATAN, FEXP1, NTSFP, FEXP2, EXP2, ATSR, SQS, CUBE, HCLIP, HWR, FWR, SQR, ASQRT };
+	enum class dcfEnum { OFF, ON };
 	int shaper_1 = 0;
 	double sat_1 = 0.00000000;
 	double modifier_1 = 0.00000000;
+	int dcf_1 = 0;
 	int shaper_2 = 0;
 	double sat_2 = 0.00000000;
 	double modifier_2 = 0.00000000;
+	int dcf_2 = 0;
 	int shaper_3 = 0;
 	double sat_3 = 0.00000000;
 	double modifier_3 = 0.00000000;
+	int dcf_3 = 0;
 
 	/*
 	* SER: 1 -> 2 -> 3
@@ -152,8 +152,6 @@ private:
 
 	double parallel_ratio = 50.00000000;
 
-	int dc_filter = 0;
-	enum class dc_filterEnum { OFF, ON };
 	// **--0x1A7F--**
     // --- end member variables
 

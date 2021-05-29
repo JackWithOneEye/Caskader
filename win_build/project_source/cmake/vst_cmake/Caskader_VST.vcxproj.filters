@@ -34,6 +34,7 @@
     <ClCompile Include="C:\Users\sr-ho\Documents\ALL_SDK\VST_SDK\VST3_SDK\public.sdk\source\main\dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\project_source\source\PluginObjects\fxobjects.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\sr-ho\Documents\ALL_SDK\myprojects\Caskader\project_source\source\PluginKernel\guiconstants.h">
@@ -81,6 +82,7 @@
     <ClInclude Include="C:\Users\sr-ho\Documents\ALL_SDK\VST_SDK\VST3_SDK\public.sdk\source\vst\vstsinglecomponenteffect.h">
       <Filter>VST3SDK</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\project_source\source\PluginObjects\fxobjects.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Users\sr-ho\Documents\ALL_SDK\myprojects\Caskader\project_source\cmake\vst_cmake\CMakeLists.txt" />
