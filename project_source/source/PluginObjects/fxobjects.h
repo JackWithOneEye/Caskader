@@ -2,19 +2,17 @@
 
 #include <memory>
 #include <math.h>
+#include "guiconstants.h"
 
 constexpr auto CH_LEFT = 0;
 constexpr auto CH_RIGHT = 1;
 
 const double kSmallestPositiveFloatValue = 1.175494351e-38;         /* min positive value */
 const double kSmallestNegativeFloatValue = -1.175494351e-38;         /* min negative value */
-const double kSqrtTwo = pow(2.0, 0.5);
 const double kEuler = exp(1.0);
 const double kEulerPlus1 = kEuler + 1.0;
 const double kEulerMinus1 = kEuler - 1.0;
-const double kMinFilterFrequency = 20.0;
-const double kMaxFilterFrequency = 20480.0; // 10 octaves above 20 Hz
-const double ARC4RANDOMMAX = 4294967295.0;  // (2^32 - 1)
+const double kPiHalf = kPi / 2.0;
 
 inline bool checkFloatUnderflow(double& value)
 {
@@ -39,6 +37,13 @@ inline double clip(double x)
 	if (x < 0.0)
 		return -1.0;
 	return 0.0;
+}
+
+inline double fastSigmoidSine(double x)
+{
+	double x_mod = -4.0 * fmod(0.25 * x, 1.0) + 2.0;
+	double approx_1 = x_mod * (2.0 - fabs(x_mod));
+	return 0.225 * (approx_1 * fabs(approx_1) - approx_1) + approx_1;
 }
 
 inline double ntsf(double x, double k, double m)
@@ -125,6 +130,18 @@ inline double fexp1(double x, double k_pc)
 	return sign * (num / denom);
 }
 
+const double kTwoOverPi = 2.0 / kPi;
+inline double sine(double x, double m_pc)
+{
+	double phaseShift = 0.0;
+	if (m_pc > 0.0)
+	{
+		double fm = 4.0 * (m_pc / 100.0); // +2 octaves
+		phaseShift = kTwoOverPi * fastSigmoidSine(fm * x);
+	}
+	return fastSigmoidSine(x + phaseShift);
+}
+
 inline double fexp2(double x)
 {
 	double sign = clip(-1.0 * x);
@@ -148,7 +165,7 @@ inline double atsr(double x)
 
 inline double hclip(double x, double k)
 {
-	double cutoff = k / 100.0;
+	double cutoff = 1.0 - (k / 100.0);
 	if (fabs(x) > cutoff)
 		return cutoff * clip(x);
 
@@ -214,7 +231,7 @@ private:
 	double yn1 = 0.0;
 };
 
-enum class waveshaperFunc { kNONE, kNTSFN, kARRY, kSIG, kSIG2, kTANH, kATAN, kFEXP1, kNTSFP, kFEXP2, kEXP2, kATSR, kSQS, kCUBE, kHCLIP, kHWR, kFWR, kSQR, kASQRT };
+enum class waveshaperFunc { kNONE, kNTSFN, kARRY, kSIG, kSIG2, kTANH, kATAN, kFEXP1, kSIN, kNTSFP, kFEXP2, kEXP2, kATSR, kSQS, kCUBE, kHCLIP, kHWR, kFWR, kSQR, kASQRT };
 enum class dcfStatus { kOFF, kON };
 
 struct WaveshaperParameters

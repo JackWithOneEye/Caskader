@@ -23,6 +23,8 @@ inline double WaveshaperBlock::applyShaperFunc(double x)
 		return atan(x, params.saturation_pct);
 	case waveshaperFunc::kFEXP1:
 		return fexp1(x, params.saturation_pct);
+	case waveshaperFunc::kSIN:
+		return sine(x, params.modifier_pct);
 	case waveshaperFunc::kNTSFP:
 		return ntsfp(x, params.saturation_pct, params.modifier_pct);
 	case waveshaperFunc::kFEXP2:
@@ -52,11 +54,13 @@ inline double WaveshaperBlock::applyShaperFunc(double x)
 double WaveshaperBlock::processAudioSample(double x, const int channel)
 {
 	double shaper_out = applyShaperFunc(x);
-	double dcf_out = channel == CH_LEFT ? dcf_l.processAudioSample(shaper_out) : dcf_r.processAudioSample(shaper_out);
 
 	if (params.dcf_status == dcfStatus::kON)
 	{
-		return dcf_out;
+		if (channel == CH_RIGHT)
+			return dcf_r.processAudioSample(shaper_out);
+		
+		return dcf_l.processAudioSample(shaper_out);
 	}
 
 	return shaper_out;

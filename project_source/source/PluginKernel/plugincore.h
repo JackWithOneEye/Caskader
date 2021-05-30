@@ -127,7 +127,7 @@ private:
 	double input_gain = 0.00000000;
 	double output_gain = 0.00000000;
 
-	enum class shaper_Enum { NONE, NTSFN, ARRY, SIG, SIG2, TANH, ATAN, FEXP1, NTSFP, FEXP2, EXP2, ATSR, SQS, CUBE, HCLIP, HWR, FWR, SQR, ASQRT };
+	enum class shaper_Enum { NONE, NTSFN, ARRY, SIG, SIG2, TANH, ATAN, FEXP1, SIN, NTSFP, FEXP2, EXP2, ATSR, SQS, CUBE, HCLIP, HWR, FWR, SQR, ASQRT };
 	enum class dcfEnum { OFF, ON };
 	int shaper_1 = 0;
 	double sat_1 = 0.00000000;

@@ -80,7 +80,7 @@ bool PluginCore::initPluginParameters()
 	piParam->setBoundVariable(&output_gain, boundVariableType::kDouble);
 	addPluginParameter(piParam);
 
-	piParam = new PluginParameter(controlID::shaper_1, "Shaper 1", "NONE,NTSFN,ARRY,SIG,SIG2,TANH,ATAN,FEXP1,NTSFP,FEXP2,EXP2,ATSR,SQS,CUBE,HCLIP,HWR,FWR,SQR,ASQRT", "NONE");
+	piParam = new PluginParameter(controlID::shaper_1, "Shaper 1", "NONE,NTSFN,ARRY,SIG,SIG2,TANH,ATAN,FEXP1,SIN,NTSFP,FEXP2,EXP2,ATSR,SQS,CUBE,HCLIP,HWR,FWR,SQR,ASQRT", "NONE");
 	piParam->setBoundVariable(&shaper_1, boundVariableType::kInt);
 	addPluginParameter(piParam);
 
@@ -100,7 +100,7 @@ bool PluginCore::initPluginParameters()
 	piParam->setBoundVariable(&dcf_1, boundVariableType::kInt);
 	addPluginParameter(piParam);
 
-	piParam = new PluginParameter(controlID::shaper_2, "Shaper 2", "NONE,NTSFN,ARRY,SIG,SIG2,TANH,ATAN,FEXP1,NTSFP,FEXP2,EXP2,ATSR,SQS,CUBE,HCLIP,HWR,FWR,SQR,ASQRT", "NONE");
+	piParam = new PluginParameter(controlID::shaper_2, "Shaper 2", "NONE,NTSFN,ARRY,SIG,SIG2,TANH,ATAN,FEXP1,SIN,NTSFP,FEXP2,EXP2,ATSR,SQS,CUBE,HCLIP,HWR,FWR,SQR,ASQRT", "NONE");
 	piParam->setBoundVariable(&shaper_2, boundVariableType::kInt);
 	addPluginParameter(piParam);
 
@@ -120,7 +120,7 @@ bool PluginCore::initPluginParameters()
 	piParam->setBoundVariable(&dcf_2, boundVariableType::kInt);
 	addPluginParameter(piParam);
 
-	piParam = new PluginParameter(controlID::shaper_3, "Shaper 3", "NONE,NTSFN,ARRY,SIG,SIG2,TANH,ATAN,FEXP1,NTSFP,FEXP2,EXP2,ATSR,SQS,CUBE,HCLIP,HWR,FWR,SQR,ASQRT", "NONE");
+	piParam = new PluginParameter(controlID::shaper_3, "Shaper 3", "NONE,NTSFN,ARRY,SIG,SIG2,TANH,ATAN,FEXP1,SIN,NTSFP,FEXP2,EXP2,ATSR,SQS,CUBE,HCLIP,HWR,FWR,SQR,ASQRT", "NONE");
 	piParam->setBoundVariable(&shaper_3, boundVariableType::kInt);
 	addPluginParameter(piParam);
 
