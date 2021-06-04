@@ -67,8 +67,9 @@ bool PluginCore::initPluginParameters()
 	// **--0xDEA7--**
 
 	PluginParameter* piParam = nullptr;
+	const char* shaper_modes = "NONE,NTSFN,ARRY,SIG,SIG2,TANH,ATAN,FEXP1,TRI2SIN,NTSFP,FEXP2,EXP2,ATSR,SQS,CUBE,HCLIP,HWR,FWR,SQR,ASQRT,XROOT";
 
-	piParam = new PluginParameter(controlID::input_gain, "Input Gain", "db", controlVariableType::kDouble, -60.000000, 20.000000, 0.000000, taper::kLinearTaper);
+	piParam = new PluginParameter(controlID::input_gain, "Input Gain", "db", controlVariableType::kDouble, -40.000000, 40.000000, 0.000000, taper::kLinearTaper);
 	piParam->setParameterSmoothing(true);
 	piParam->setSmoothingTimeMsec(20.000000);
 	piParam->setBoundVariable(&input_gain, boundVariableType::kDouble);
@@ -80,7 +81,7 @@ bool PluginCore::initPluginParameters()
 	piParam->setBoundVariable(&output_gain, boundVariableType::kDouble);
 	addPluginParameter(piParam);
 
-	piParam = new PluginParameter(controlID::shaper_1, "Shaper 1", "NONE,NTSFN,ARRY,SIG,SIG2,TANH,ATAN,FEXP1,SIN,NTSFP,FEXP2,EXP2,ATSR,SQS,CUBE,HCLIP,HWR,FWR,SQR,ASQRT", "NONE");
+	piParam = new PluginParameter(controlID::shaper_1, "Shaper 1", shaper_modes, "NONE");
 	piParam->setBoundVariable(&shaper_1, boundVariableType::kInt);
 	addPluginParameter(piParam);
 
@@ -100,7 +101,7 @@ bool PluginCore::initPluginParameters()
 	piParam->setBoundVariable(&dcf_1, boundVariableType::kInt);
 	addPluginParameter(piParam);
 
-	piParam = new PluginParameter(controlID::shaper_2, "Shaper 2", "NONE,NTSFN,ARRY,SIG,SIG2,TANH,ATAN,FEXP1,SIN,NTSFP,FEXP2,EXP2,ATSR,SQS,CUBE,HCLIP,HWR,FWR,SQR,ASQRT", "NONE");
+	piParam = new PluginParameter(controlID::shaper_2, "Shaper 2", shaper_modes, "NONE");
 	piParam->setBoundVariable(&shaper_2, boundVariableType::kInt);
 	addPluginParameter(piParam);
 
@@ -120,7 +121,7 @@ bool PluginCore::initPluginParameters()
 	piParam->setBoundVariable(&dcf_2, boundVariableType::kInt);
 	addPluginParameter(piParam);
 
-	piParam = new PluginParameter(controlID::shaper_3, "Shaper 3", "NONE,NTSFN,ARRY,SIG,SIG2,TANH,ATAN,FEXP1,SIN,NTSFP,FEXP2,EXP2,ATSR,SQS,CUBE,HCLIP,HWR,FWR,SQR,ASQRT", "NONE");
+	piParam = new PluginParameter(controlID::shaper_3, "Shaper 3", shaper_modes, "NONE");
 	piParam->setBoundVariable(&shaper_3, boundVariableType::kInt);
 	addPluginParameter(piParam);
 

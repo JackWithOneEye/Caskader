@@ -39,11 +39,18 @@ inline double clip(double x)
 	return 0.0;
 }
 
-inline double fastSigmoidSine(double x)
+inline double fastSigmoidTri2Sin(double x, double sharpness, double q)
 {
-	double x_mod = -4.0 * fmod(0.25 * x, 1.0) + 2.0;
-	double approx_1 = x_mod * (2.0 - fabs(x_mod));
-	return 0.225 * (approx_1 * fabs(approx_1) - approx_1) + approx_1;
+	double x_mod = 1.0 - 0.5 * x + 2.0 * floor(0.25 * x);
+	double s_1 = x_mod - x_mod * fabs(x_mod);
+	double s_11 = s_1 * 4.0;
+	if (sharpness < 0.01)
+		// sin(kPiHalf * x))
+		return 0.9 * (s_11 * fabs(s_1) - s_1) + s_11;
+
+	// asin(sharpness * sin(kPiHalf * x)) / asin(sharpness)
+	double s_2 = clip(x_mod) * (1 - sqrt(1.0 - sharpness * fabs(s_11))) / (1 - sqrt(1.0 - sharpness));
+	return q * (s_2 * fabs(s_2) - s_2) + s_2;
 }
 
 inline double ntsf(double x, double k, double m)
@@ -131,15 +138,18 @@ inline double fexp1(double x, double k_pc)
 }
 
 const double kTwoOverPi = 2.0 / kPi;
-inline double sine(double x, double m_pc)
+inline double tri2sin(double x, double k_pc, double m_pc)
 {
+	double sharpness = 1.0 - (k_pc / 100.0);
+	double sharpness_frc = 0.225 * sharpness;
+	double q = (0.225 - sharpness_frc) / (1.0 - sharpness * sharpness + sharpness_frc);
 	double phaseShift = 0.0;
 	if (m_pc > 0.0)
 	{
 		double fm = 4.0 * (m_pc / 100.0); // +2 octaves
-		phaseShift = kTwoOverPi * fastSigmoidSine(fm * x);
+		phaseShift = kTwoOverPi * fastSigmoidTri2Sin(fm * x, sharpness, q);
 	}
-	return fastSigmoidSine(x + phaseShift);
+	return fastSigmoidTri2Sin(x + phaseShift, sharpness, q);
 }
 
 inline double fexp2(double x)
@@ -202,6 +212,23 @@ inline double asqrt(double x)
 	return sqrt(fabs(x));
 }
 
+inline double xroot(double x, double k_pc)
+{
+	if (x >= 1.0)
+		return 1.0;
+	if (x <= -1.0)
+		return -1.0;
+
+	k_pc += 1.0;
+	if (x > 0.0)
+	{
+		double x_2 = 1.0 - x;
+		return 1.0 - pow(x_2, k_pc / x_2);
+	}
+	double x_2 = 1.0 + x;
+	return pow(x_2, k_pc / x_2) - 1.0;
+}
+
 
 class DCFilter
 {
@@ -231,7 +258,7 @@ private:
 	double yn1 = 0.0;
 };
 
-enum class waveshaperFunc { kNONE, kNTSFN, kARRY, kSIG, kSIG2, kTANH, kATAN, kFEXP1, kSIN, kNTSFP, kFEXP2, kEXP2, kATSR, kSQS, kCUBE, kHCLIP, kHWR, kFWR, kSQR, kASQRT };
+enum class waveshaperFunc { kNONE, kNTSFN, kARRY, kSIG, kSIG2, kTANH, kATAN, kFEXP1, kTRI2SIN, kNTSFP, kFEXP2, kEXP2, kATSR, kSQS, kCUBE, kHCLIP, kHWR, kFWR, kSQR, kASQRT, kXROOT };
 enum class dcfStatus { kOFF, kON };
 
 struct WaveshaperParameters

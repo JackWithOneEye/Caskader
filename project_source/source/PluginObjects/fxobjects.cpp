@@ -23,8 +23,8 @@ inline double WaveshaperBlock::applyShaperFunc(double x)
 		return atan(x, params.saturation_pct);
 	case waveshaperFunc::kFEXP1:
 		return fexp1(x, params.saturation_pct);
-	case waveshaperFunc::kSIN:
-		return sine(x, params.modifier_pct);
+	case waveshaperFunc::kTRI2SIN:
+		return tri2sin(x, params.saturation_pct, params.modifier_pct);
 	case waveshaperFunc::kNTSFP:
 		return ntsfp(x, params.saturation_pct, params.modifier_pct);
 	case waveshaperFunc::kFEXP2:
@@ -47,6 +47,8 @@ inline double WaveshaperBlock::applyShaperFunc(double x)
 		return sqr(x); // rectifier
 	case waveshaperFunc::kASQRT:
 		return asqrt(x); // rectifier
+	case waveshaperFunc::kXROOT:
+		return xroot(x, params.saturation_pct);
 	}
 	return x;
 }
