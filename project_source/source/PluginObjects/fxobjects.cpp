@@ -48,7 +48,7 @@ inline double WaveshaperBlock::applyShaperFunc(double x)
 	case waveshaperFunc::kASQRT:
 		return asqrt(x); // rectifier
 	case waveshaperFunc::kXROOT:
-		return xroot(x, params.saturation_pct);
+		return xroot(x, params.saturation_pct, params.modifier_pct);
 	}
 	return x;
 }

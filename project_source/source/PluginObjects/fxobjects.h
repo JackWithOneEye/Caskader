@@ -212,7 +212,8 @@ inline double asqrt(double x)
 	return sqrt(fabs(x));
 }
 
-inline double xroot(double x, double k_pc)
+// https://www.desmos.com/calculator/3xggvyy7uf
+inline double xroot(double x, double k_pc, double m_pc)
 {
 	if (x >= 1.0)
 		return 1.0;
@@ -225,8 +226,18 @@ inline double xroot(double x, double k_pc)
 		double x_2 = 1.0 - x;
 		return 1.0 - pow(x_2, k_pc / x_2);
 	}
+
 	double x_2 = 1.0 + x;
-	return pow(x_2, k_pc / x_2) - 1.0;
+	if (m_pc == 0.0)
+		return pow(x_2, k_pc / x_2) - 1.0;
+
+	double x_3 = 1.0 + fabs(x);
+	if (m_pc == 100.0)
+		return pow(x_2, k_pc / x_3) - 1.0;
+
+	double m = m_pc / 100.0;
+	double pot = (m * (x_2 - x_3) + x_3) / (x_2 * x_3);
+	return pow(x_2, k_pc * pot) - 1.0;
 }
 
 
